@@ -1,0 +1,25 @@
+version: '3'
+services:
+  nats:
+    image: nats
+    entrypoint: /gnatsd -DV
+    ports:
+      - '4222'
+  api:
+    image: asia.gcr.io/blockchain-data-platform/demo-api
+    links:
+      - nats
+    environment:
+      - 'NATS_URI=nats://nats:4222'
+    depends_on:
+      - nats
+    ports:
+      - '80:8080'
+  worker:
+    image: asia.gcr.io/blockchain-data-platform/demo-worker
+    links:
+      - nats
+    environment:
+      - 'NATS_URI=nats://nats:4222'
+    depends_on:
+      - nats
