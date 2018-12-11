@@ -1,0 +1,33 @@
+version: '3'
+services:
+  nats:
+    image: nats
+    entrypoint: /gnatsd -DV
+    expose:
+      - '4222'
+  api:
+    build:
+      context: ./api
+      dockerfile: dev.Dockerfile
+    links:
+      - nats
+    environment:
+      - NATS_URI=nats://nats:4222
+    depends_on:
+      - nats
+    volumes:
+      - ./api:/app:ro
+    ports:
+      - '8888:8080'
+  worker:
+    build:
+      context: ./worker
+      dockerfile: dev.Dockerfile
+    links:
+      - nats
+    environment:
+      - NATS_URI=nats://nats:4222
+    depends_on:
+      - nats
+    volumes:
+      - ./worker:/app:ro

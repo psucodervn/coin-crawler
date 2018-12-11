@@ -1,0 +1,27 @@
+version: '3'
+services:
+  nats:
+    image: nats
+    entrypoint: /gnatsd -DV
+    expose:
+      - '4222'
+  api:
+    build:
+      context: ./api
+    links:
+      - nats
+    environment:
+      - 'NATS_URI=nats://nats:4222'
+    depends_on:
+      - nats
+    ports:
+      - '8888:8080'
+  worker:
+    build:
+      context: ./worker
+    links:
+      - nats
+    environment:
+      - 'NATS_URI=nats://nats:4222'
+    depends_on:
+      - nats
